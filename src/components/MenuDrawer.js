@@ -1,7 +1,32 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Image} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  FlatList,
+} from 'react-native';
+import {connect} from 'react-redux';
+import {getCategory} from '../redux/Actions/category';
+import {ScrollView} from 'react-native-gesture-handler';
 
 class MenuDrawer extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      categoryList: [],
+    };
+  }
+
+  componentDidMount = async () => {
+    await this.props.dispatch(getCategory()).then(res => {
+      this.setState({
+        categoryList: this.props.categoryList,
+      });
+    });
+  };
+
   navLink(nav, text) {
     return (
       <TouchableOpacity
@@ -13,6 +38,7 @@ class MenuDrawer extends Component {
   }
 
   render() {
+    console.log('ini category list', this.state.categoryList);
     return (
       <View style={styles.container}>
         <View style={styles.topLink}>
@@ -23,20 +49,41 @@ class MenuDrawer extends Component {
                 source={require('../assets/images/arkan.png')}
               />
               <View style={{alignItems: 'center'}}>
-                <Text style={{color: 'white', fontSize : 20}}>Full Name</Text>
+                <Text style={{color: 'white', fontSize: 20}}>David Sanchezz</Text>
               </View>
             </View>
           </View>
         </View>
         <View style={styles.bottomLink}>
-          <Text style={{fontSize : 18}}>Add Category</Text>
+          <ScrollView>
+            <FlatList
+              data={this.state.categoryList}
+              numColumns={1}
+              onEndReachedThreshold={0.2}
+              keyExtractor={item => item.id_category}
+              renderItem={({item, index}) => {
+                return (
+                  <TouchableOpacity>
+                    <Text style={{fontSize: 18, marginVertical : 10}}>{item.category}</Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+            <Text style={{fontSize: 18, marginVertical : 10}}>Add Category</Text>
+          </ScrollView>
         </View>
       </View>
     );
   }
 }
 
-export default MenuDrawer;
+const mapStateToProps = state => {
+  return {
+    categoryList: state.category.categoryList,
+  };
+};
+
+export default connect(mapStateToProps)(MenuDrawer);
 
 const styles = StyleSheet.create({
   container: {
@@ -58,8 +105,8 @@ const styles = StyleSheet.create({
   bottomLink: {
     flex: 1,
     backgroundColor: 'white',
-    paddingTop : 20,
-    paddingHorizontal : 20
+    paddingTop: 20,
+    paddingHorizontal: 20,
   },
   profile: {
     flex: 1,

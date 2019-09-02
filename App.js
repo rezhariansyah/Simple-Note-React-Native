@@ -1,10 +1,15 @@
 import React, {Component} from 'react';
-import {View} from 'react-native';
 import MainNavigator from './src/configs/routes/MainNavigator';
+import store from './src/redux/Store';
+import {Provider} from 'react-redux';
 
 class App extends Component {
   render() {
-    return <MainNavigator />;
+    return (
+      <Provider store={store}>
+        <MainNavigator />
+      </Provider>
+    );
   }
 }
 

@@ -7,11 +7,31 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  FlatList,
 } from 'react-native';
 import {Icon, Fab} from 'native-base';
+import {connect} from 'react-redux';
+import {getNote} from '../redux/Actions/note';
+import moment from 'moment';
 
 class Home extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      noteList: [],
+    };
+  }
+
+  componentDidMount = async () => {
+    await this.props.dispatch(getNote()).then(res => {
+      this.setState({
+        noteList: this.props.noteList,
+      });
+    });
+  };
+
   render() {
+    console.log(this.state.noteList);
     return (
       <Fragment>
         <View style={styles.contentContainer}>
@@ -49,14 +69,38 @@ class Home extends Component {
           </View>
           <ScrollView>
             <View style={styles.FlatList}>
-              <TouchableOpacity activeOpacity={1}>
-                <View style={styles.item}>
-                  <Text style={{color: 'white', textAlign: 'right'}}>Date</Text>
-                  <Text style={{color: 'white', fontSize: 17}}>Name Card</Text>
-                  <Text style={{color: 'white'}}>Category</Text>
-                  <Text style={{color: 'white'}}>Desc</Text>
-                </View>
-              </TouchableOpacity>
+              <FlatList
+                data={this.state.noteList}
+                numColumns={2}
+                onEndReachedThreshold={0.2}
+                keyExtractor={item => item.id_note}
+                renderItem={({item, index}) => {
+                  return (
+                    <TouchableOpacity>
+                      <View
+                        style={{
+                          backgroundColor: `${item.color}`,
+                          margin: 15,
+                          borderRadius: 8,
+                          elevation: 6,
+                          width: 138,
+                          height: 136,
+                          padding: 5,
+                        }}
+                        key={index}>
+                        <Text style={{color: 'white', textAlign: 'right'}}>
+                          {moment(item.date, 'YYYY-MM-DD').format('DD-MM')}
+                        </Text>
+                        <Text style={{color: 'white', fontSize: 17}}>
+                          {item.name}
+                        </Text>
+                        <Text style={{color: 'white'}}>{item.category}</Text>
+                        <Text style={{color: 'white'}}>{item.desc}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
             </View>
           </ScrollView>
           <View
@@ -86,7 +130,13 @@ class Home extends Component {
   }
 }
 
-export default Home;
+const mapStateToProps = state => {
+  return {
+    noteList: state.note.noteList,
+  };
+};
+
+export default connect(mapStateToProps)(Home);
 
 const styles = StyleSheet.create({
   contentContainer: {
@@ -138,14 +188,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'center',
-  },
-  item: {
-    backgroundColor: '#4fd4ef',
-    margin: 15,
-    borderRadius: 8,
-    elevation: 6,
-    width: 138,
-    height: 136,
-    padding: 5,
   },
 });
